@@ -290,6 +290,9 @@ async function sendFile() {
 
 sendButton.addEventListener("click", async () => {
   if (!fileToSend) return;
+  if (!shareLink.value) {
+    updateShareLink();
+  }
   if (!receiverConnected) {
     pendingSend = true;
     setStatus(senderStatus, "En attente du receveur pour démarrer…");
