@@ -7,17 +7,20 @@ const fileName = document.getElementById("file-name");
 const sendButton = document.getElementById("send-file");
 const shareLink = document.getElementById("share-link");
 const copyLinkButton = document.getElementById("copy-link");
-const publicUrlInput = document.getElementById("public-url");
 const sendProgress = document.getElementById("send-progress");
 const receiveProgress = document.getElementById("receive-progress");
 const downloadArea = document.getElementById("download-area");
+const downloadName = document.getElementById("download-name");
 const downloadLink = document.getElementById("download-link");
 
 const urlParams = new URLSearchParams(window.location.search);
 const presetRoomId = urlParams.get("room");
+const presetToken = urlParams.get("token");
+const presetRole = urlParams.get("role");
 
 let role = null;
 let roomId = presetRoomId || "";
+let accessToken = presetToken || "";
 let ws;
 let peerConnection;
 let dataChannel;
@@ -43,11 +46,12 @@ function showPanel(panel) {
 }
 
 function updateShareLink() {
-  if (!roomId) return;
-  const baseUrl = publicUrlInput?.value?.trim() || window.location.href;
-  const url = new URL(baseUrl);
+  if (!roomId || !accessToken) return;
+  const url = new URL(window.location.origin);
+  url.protocol = "https:";
   url.pathname = window.location.pathname;
   url.searchParams.set("room", roomId);
+  url.searchParams.set("token", accessToken);
   url.searchParams.set("role", "receiver");
   shareLink.value = url.toString();
 }
@@ -66,17 +70,57 @@ function setStatus(element, message, isSuccess = false) {
 }
 
 function createRoomId() {
-  return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function createAccessToken() {
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+  const base64 = btoa(String.fromCharCode(...bytes));
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function buildWebSocketUrl() {
+  const url = new URL(window.location.href);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  url.pathname = "/ws";
+  url.search = "";
+  return url.toString();
 }
 
 function connectWebSocket() {
   return new Promise((resolve) => {
-    ws = new WebSocket(`${window.location.origin.replace("http", "ws")}/ws`);
+    ws = new WebSocket(buildWebSocketUrl());
 
     ws.addEventListener("open", () => resolve());
 
     ws.addEventListener("message", async (event) => {
       const message = JSON.parse(event.data);
+
+      if (message.type === "error") {
+        setStatus(
+          role === "sender" ? senderStatus : receiverStatus,
+          message.message || "Erreur côté serveur."
+        );
+        return;
+      }
 
       if (message.type === "joined") {
         setStatus(
@@ -199,6 +243,9 @@ function setupDataChannel() {
         incomingSize = 0;
         updateReceiveProgress(0);
         downloadArea.classList.add("hidden");
+        if (downloadName) {
+          downloadName.textContent = `Nom du fichier : ${meta.name}`;
+        }
       }
       return;
     }
@@ -215,7 +262,7 @@ function setupDataChannel() {
       const url = URL.createObjectURL(blob);
       downloadLink.href = url;
       downloadLink.download = incomingFileMeta.name;
-      downloadLink.textContent = `Télécharger ${incomingFileMeta.name}`;
+      downloadLink.textContent = "Télécharger le fichier";
       downloadArea.classList.remove("hidden");
       setStatus(receiverStatus, "Téléchargement prêt !", true);
     }
@@ -239,6 +286,13 @@ async function createOffer() {
 async function joinRoom(selectedRole) {
   role = selectedRole;
   roomId = roomId || createRoomId();
+  if (role === "sender") {
+    accessToken = accessToken || createAccessToken();
+  } else if (!accessToken) {
+    showPanel(receiverPanel);
+    setStatus(receiverStatus, "Lien invalide : jeton de sécurité manquant.");
+    return;
+  }
 
   if (role === "sender") {
     showPanel(senderPanel);
@@ -250,7 +304,7 @@ async function joinRoom(selectedRole) {
   await connectWebSocket();
   await initPeerConnection();
 
-  ws.send(JSON.stringify({ type: "join", roomId, role }));
+  ws.send(JSON.stringify({ type: "join", roomId, role, token: accessToken }));
 }
 
 fileInput.addEventListener("change", (event) => {
@@ -318,7 +372,7 @@ copyLinkButton.addEventListener("click", async () => {
   }, 2000);
 });
 
-if (presetRoomId) {
+if (presetRoomId && presetRole === "receiver") {
   joinRoom("receiver");
 } else {
   joinRoom("sender");

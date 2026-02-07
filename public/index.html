@@ -17,18 +17,6 @@
 
       <section class="card">
         <h2>Transfert P2P</h2>
-        <p class="helper">
-          L&apos;envoyeur sélectionne un fichier, partage le lien, puis lance l&apos;envoi
-          dès que le receveur est connecté.
-        </p>
-        <label>
-          Adresse publique (si le receveur est sur un autre réseau)
-          <input
-            id="public-url"
-            type="text"
-            placeholder="https://mon-domaine.tld ou http://IP:PORT"
-          />
-        </label>
       </section>
 
       <section class="card" id="sender-panel">
@@ -60,7 +48,8 @@
         <progress id="receive-progress" value="0" max="100"></progress>
         <div id="download-area" class="hidden">
           <p>Fichier prêt :</p>
-          <a id="download-link" class="primary" download>Télécharger</a>
+          <p id="download-name" class="file-name"></p>
+          <a id="download-link" class="primary" download>Télécharger le fichier</a>
         </div>
       </section>
 
@@ -75,6 +64,9 @@
           <li>
             Utilisez un réseau stable ou configurez un serveur TURN pour les
             réseaux stricts.
+          </li>
+          <li>
+            Le lien généré contient un jeton secret requis pour rejoindre la session.
           </li>
         </ul>
       </section>
