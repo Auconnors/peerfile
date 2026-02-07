@@ -16,21 +16,10 @@
       </header>
 
       <section class="card">
-        <h2>Choisir un mode</h2>
-        <div class="mode-buttons">
-          <button id="mode-sender" class="primary">Je veux envoyer</button>
-          <button id="mode-receiver">Je veux recevoir</button>
-        </div>
-        <div class="inline-inputs">
-          <label>
-            Identifiant de session
-            <input id="room-id-input" type="text" placeholder="ex: 8f2c..." />
-          </label>
-          <button id="join-room">Rejoindre</button>
-        </div>
+        <h2>Transfert P2P</h2>
         <p class="helper">
-          L&apos;envoyeur crée un lien et le partage. Le transfert fonctionne tant que
-          l&apos;onglet de l&apos;envoyeur reste ouvert.
+          L&apos;envoyeur sélectionne un fichier, partage le lien, puis lance l&apos;envoi
+          dès que le receveur est connecté.
         </p>
       </section>
 
@@ -46,7 +35,7 @@
         </div>
         <div class="row">
           <button id="send-file" class="primary" disabled>
-            Démarrer l&apos;envoi
+            Envoyer le fichier
           </button>
         </div>
         <div class="row">
@@ -60,11 +49,6 @@
       <section class="card hidden" id="receiver-panel">
         <h2>Recevoir un fichier</h2>
         <div class="status" id="receiver-status">En attente de l&apos;envoyeur…</div>
-        <div class="row">
-          <button id="accept-file" class="primary" disabled>
-            Prêt à recevoir
-          </button>
-        </div>
         <progress id="receive-progress" value="0" max="100"></progress>
         <div id="download-area" class="hidden">
           <p>Fichier prêt :</p>

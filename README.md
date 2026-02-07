@@ -6,7 +6,7 @@ Transfert de fichiers 100% P2P entre deux navigateurs. Le fichier reste dans le 
 
 - WebRTC pour le transfert direct (peer-to-peer).
 - WebSocket uniquement pour la signalisation (échange d'offres/candidates).
-- Le lien généré permet au receveur de rejoindre la session.
+- Le lien généré permet au receveur de rejoindre automatiquement la session.
 - Le transfert fonctionne tant que l'onglet de l'envoyeur reste ouvert.
 
 ## Démarrer
@@ -16,7 +16,7 @@ npm install
 npm start
 ```
 
-Ouvrez ensuite [http://localhost:3000](http://localhost:3000).
+Ouvrez ensuite [http://localhost:3000](http://localhost:3000) pour l'envoyeur. Le receveur ouvre le lien partagé pour rejoindre.
 
 ## Notes réseau
 

@@ -1,7 +1,3 @@
-const modeSenderButton = document.getElementById("mode-sender");
-const modeReceiverButton = document.getElementById("mode-receiver");
-const roomInput = document.getElementById("room-id-input");
-const joinRoomButton = document.getElementById("join-room");
 const senderPanel = document.getElementById("sender-panel");
 const receiverPanel = document.getElementById("receiver-panel");
 const senderStatus = document.getElementById("sender-status");
@@ -11,7 +7,6 @@ const fileName = document.getElementById("file-name");
 const sendButton = document.getElementById("send-file");
 const shareLink = document.getElementById("share-link");
 const copyLinkButton = document.getElementById("copy-link");
-const acceptButton = document.getElementById("accept-file");
 const sendProgress = document.getElementById("send-progress");
 const receiveProgress = document.getElementById("receive-progress");
 const downloadArea = document.getElementById("download-area");
@@ -19,7 +14,6 @@ const downloadLink = document.getElementById("download-link");
 
 const urlParams = new URLSearchParams(window.location.search);
 const presetRoomId = urlParams.get("room");
-const presetRole = urlParams.get("role");
 
 let role = null;
 let roomId = presetRoomId || "";
@@ -31,6 +25,7 @@ let incomingFileMeta;
 let incomingBuffers = [];
 let incomingSize = 0;
 let offerSent = false;
+let receiverConnected = false;
 
 const CHUNK_SIZE = 16 * 1024;
 
@@ -38,10 +33,6 @@ const iceServers = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:global.stun.twilio.com:3478" }
 ];
-
-function setRoomInput(value) {
-  roomInput.value = value;
-}
 
 function showPanel(panel) {
   senderPanel.classList.add("hidden");
@@ -94,8 +85,10 @@ function connectWebSocket() {
 
       if (message.type === "room-state") {
         if (role === "sender") {
-          const receiverReady = message.receiverConnected;
-          sendButton.disabled = !fileToSend || !receiverReady;
+          receiverConnected = message.receiverConnected;
+          const receiverReady = receiverConnected;
+          const channelReady = dataChannel?.readyState === "open";
+          sendButton.disabled = !fileToSend || !receiverReady || !channelReady;
           setStatus(
             senderStatus,
             receiverReady
@@ -112,7 +105,6 @@ function connectWebSocket() {
           }
         } else if (role === "receiver") {
           const senderReady = message.senderConnected;
-          acceptButton.disabled = !senderReady;
           setStatus(
             receiverStatus,
             senderReady
@@ -184,9 +176,7 @@ function setupDataChannel() {
 
   dataChannel.addEventListener("open", () => {
     if (role === "sender") {
-      sendButton.disabled = false;
-    } else {
-      acceptButton.disabled = false;
+      sendButton.disabled = !fileToSend || !receiverConnected;
     }
   });
 
@@ -238,13 +228,7 @@ async function createOffer() {
 
 async function joinRoom(selectedRole) {
   role = selectedRole;
-  roomId = roomId || roomInput.value.trim();
-
-  if (!roomId) {
-    roomId = createRoomId();
-  }
-
-  setRoomInput(roomId);
+  roomId = roomId || createRoomId();
 
   if (role === "sender") {
     showPanel(senderPanel);
@@ -262,7 +246,8 @@ async function joinRoom(selectedRole) {
 fileInput.addEventListener("change", (event) => {
   fileToSend = event.target.files[0];
   fileName.textContent = fileToSend ? fileToSend.name : "Aucun fichier sélectionné";
-  sendButton.disabled = !fileToSend;
+  const channelReady = dataChannel?.readyState === "open";
+  sendButton.disabled = !fileToSend || !channelReady || !receiverConnected;
 });
 
 sendButton.addEventListener("click", async () => {
@@ -297,10 +282,6 @@ sendButton.addEventListener("click", async () => {
   setStatus(senderStatus, "Fichier envoyé !", true);
 });
 
-acceptButton.addEventListener("click", () => {
-  setStatus(receiverStatus, "Prêt à recevoir les données…", true);
-});
-
 copyLinkButton.addEventListener("click", async () => {
   if (!shareLink.value) return;
   await navigator.clipboard.writeText(shareLink.value);
@@ -310,14 +291,8 @@ copyLinkButton.addEventListener("click", async () => {
   }, 2000);
 });
 
-modeSenderButton.addEventListener("click", () => joinRoom("sender"));
-modeReceiverButton.addEventListener("click", () => joinRoom("receiver"));
-joinRoomButton.addEventListener("click", () => {
-  if (!roomInput.value.trim()) return;
+if (presetRoomId) {
   joinRoom("receiver");
-});
-
-if (presetRoomId && presetRole) {
-  setRoomInput(presetRoomId);
-  joinRoom(presetRole);
+} else {
+  joinRoom("sender");
 }
