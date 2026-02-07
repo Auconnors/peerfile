@@ -1,0 +1,14 @@
+{
+  "name": "peerfile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Simple 100% P2P file transfer demo using WebRTC + WebSocket signaling.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}
