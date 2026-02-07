@@ -17,18 +17,6 @@
 
       <section class="card">
         <h2>Transfert P2P</h2>
-        <p class="helper">
-          L&apos;envoyeur sélectionne un fichier, partage le lien, puis lance l&apos;envoi
-          dès que le receveur est connecté.
-        </p>
-        <label>
-          Adresse publique (si le receveur est sur un autre réseau)
-          <input
-            id="public-url"
-            type="text"
-            placeholder="https://mon-domaine.tld ou http://IP:PORT"
-          />
-        </label>
       </section>
 
       <section class="card" id="sender-panel">
@@ -50,6 +38,7 @@
           <label>Lien à partager</label>
           <input id="share-link" type="text" readonly />
           <button id="copy-link">Copier le lien</button>
+          <button id="reset-link">Réinitialiser le lien</button>
         </div>
         <progress id="send-progress" value="0" max="100"></progress>
       </section>
@@ -60,7 +49,7 @@
         <progress id="receive-progress" value="0" max="100"></progress>
         <div id="download-area" class="hidden">
           <p>Fichier prêt :</p>
-          <a id="download-link" class="primary" download>Télécharger</a>
+          <a id="download-link" class="primary" download>Télécharger le fichier</a>
         </div>
       </section>
 

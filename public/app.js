@@ -7,7 +7,7 @@ const fileName = document.getElementById("file-name");
 const sendButton = document.getElementById("send-file");
 const shareLink = document.getElementById("share-link");
 const copyLinkButton = document.getElementById("copy-link");
-const publicUrlInput = document.getElementById("public-url");
+const resetLinkButton = document.getElementById("reset-link");
 const sendProgress = document.getElementById("send-progress");
 const receiveProgress = document.getElementById("receive-progress");
 const downloadArea = document.getElementById("download-area");
@@ -47,7 +47,7 @@ function showPanel(panel) {
 
 function updateShareLink() {
   if (!roomId || !accessToken) return;
-  const baseUrl = publicUrlInput?.value?.trim() || window.location.href;
+  const baseUrl = window.location.href;
   const url = new URL(baseUrl);
   url.pathname = window.location.pathname;
   url.searchParams.set("room", roomId);
@@ -242,7 +242,7 @@ function setupDataChannel() {
       const url = URL.createObjectURL(blob);
       downloadLink.href = url;
       downloadLink.download = incomingFileMeta.name;
-      downloadLink.textContent = `Télécharger ${incomingFileMeta.name}`;
+      downloadLink.textContent = "Télécharger le fichier";
       downloadArea.classList.remove("hidden");
       setStatus(receiverStatus, "Téléchargement prêt !", true);
     }
@@ -352,10 +352,11 @@ copyLinkButton.addEventListener("click", async () => {
   }, 2000);
 });
 
-publicUrlInput?.addEventListener("input", () => {
-  if (role === "sender") {
-    updateShareLink();
-  }
+resetLinkButton?.addEventListener("click", () => {
+  if (role !== "sender") return;
+  accessToken = createAccessToken();
+  updateShareLink();
+  setStatus(senderStatus, "Lien réinitialisé. Partagez le nouveau lien.");
 });
 
 if (presetRoomId && presetRole === "receiver") {
