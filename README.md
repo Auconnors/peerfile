@@ -16,7 +16,7 @@ npm install
 npm start
 ```
 
-Ouvrez ensuite [http://localhost:3000](http://localhost:3000) pour l'envoyeur. Le receveur ouvre le lien partagé pour rejoindre.
+Ouvrez ensuite [http://localhost:3000](http://localhost:3000) pour l'envoyeur. Le receveur ouvre le lien partagé pour rejoindre. Si le receveur est sur un autre réseau, renseignez l'adresse publique (IP/nom de domaine) dans l'interface pour générer un lien accessible depuis l'extérieur.
 
 ## Notes réseau
 

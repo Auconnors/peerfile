@@ -7,6 +7,7 @@ const fileName = document.getElementById("file-name");
 const sendButton = document.getElementById("send-file");
 const shareLink = document.getElementById("share-link");
 const copyLinkButton = document.getElementById("copy-link");
+const publicUrlInput = document.getElementById("public-url");
 const sendProgress = document.getElementById("send-progress");
 const receiveProgress = document.getElementById("receive-progress");
 const downloadArea = document.getElementById("download-area");
@@ -43,7 +44,9 @@ function showPanel(panel) {
 
 function updateShareLink() {
   if (!roomId) return;
-  const url = new URL(window.location.href);
+  const baseUrl = publicUrlInput?.value?.trim() || window.location.href;
+  const url = new URL(baseUrl);
+  url.pathname = window.location.pathname;
   url.searchParams.set("room", roomId);
   url.searchParams.set("role", "receiver");
   shareLink.value = url.toString();
