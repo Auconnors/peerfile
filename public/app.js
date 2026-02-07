@@ -26,6 +26,7 @@ let incomingBuffers = [];
 let incomingSize = 0;
 let offerSent = false;
 let receiverConnected = false;
+let pendingSend = false;
 
 const CHUNK_SIZE = 16 * 1024;
 
@@ -87,8 +88,7 @@ function connectWebSocket() {
         if (role === "sender") {
           receiverConnected = message.receiverConnected;
           const receiverReady = receiverConnected;
-          const channelReady = dataChannel?.readyState === "open";
-          sendButton.disabled = !fileToSend || !receiverReady || !channelReady;
+          sendButton.disabled = !fileToSend;
           setStatus(
             senderStatus,
             receiverReady
@@ -102,6 +102,10 @@ function connectWebSocket() {
           if (receiverReady && !offerSent) {
             offerSent = true;
             await createOffer();
+          }
+          if (receiverReady && pendingSend && dataChannel?.readyState === "open") {
+            pendingSend = false;
+            await sendFile();
           }
         } else if (role === "receiver") {
           const senderReady = message.senderConnected;
@@ -176,7 +180,10 @@ function setupDataChannel() {
 
   dataChannel.addEventListener("open", () => {
     if (role === "sender") {
-      sendButton.disabled = !fileToSend || !receiverConnected;
+      if (pendingSend && receiverConnected) {
+        pendingSend = false;
+        sendFile();
+      }
     }
   });
 
@@ -246,11 +253,10 @@ async function joinRoom(selectedRole) {
 fileInput.addEventListener("change", (event) => {
   fileToSend = event.target.files[0];
   fileName.textContent = fileToSend ? fileToSend.name : "Aucun fichier sélectionné";
-  const channelReady = dataChannel?.readyState === "open";
-  sendButton.disabled = !fileToSend || !channelReady || !receiverConnected;
+  sendButton.disabled = !fileToSend;
 });
 
-sendButton.addEventListener("click", async () => {
+async function sendFile() {
   if (!fileToSend || !dataChannel || dataChannel.readyState !== "open") return;
   sendButton.disabled = true;
 
@@ -280,6 +286,21 @@ sendButton.addEventListener("click", async () => {
   }
 
   setStatus(senderStatus, "Fichier envoyé !", true);
+}
+
+sendButton.addEventListener("click", async () => {
+  if (!fileToSend) return;
+  if (!receiverConnected) {
+    pendingSend = true;
+    setStatus(senderStatus, "En attente du receveur pour démarrer…");
+    return;
+  }
+  if (!dataChannel || dataChannel.readyState !== "open") {
+    pendingSend = true;
+    setStatus(senderStatus, "Connexion en cours, envoi dès que prêt…");
+    return;
+  }
+  await sendFile();
 });
 
 copyLinkButton.addEventListener("click", async () => {
