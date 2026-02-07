@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PeerFile - Transfert P2P</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>PeerFile</h1>
+        <p class="subtitle">
+          Transfert 100% P2P entre deux navigateurs (pas de stockage serveur).
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Choisir un mode</h2>
+        <div class="mode-buttons">
+          <button id="mode-sender" class="primary">Je veux envoyer</button>
+          <button id="mode-receiver">Je veux recevoir</button>
+        </div>
+        <div class="inline-inputs">
+          <label>
+            Identifiant de session
+            <input id="room-id-input" type="text" placeholder="ex: 8f2c..." />
+          </label>
+          <button id="join-room">Rejoindre</button>
+        </div>
+        <p class="helper">
+          L&apos;envoyeur crée un lien et le partage. Le transfert fonctionne tant que
+          l&apos;onglet de l&apos;envoyeur reste ouvert.
+        </p>
+      </section>
+
+      <section class="card hidden" id="sender-panel">
+        <h2>Envoyer un fichier</h2>
+        <div class="status" id="sender-status">En attente d&apos;un receveur…</div>
+        <div class="row">
+          <label class="file-picker">
+            <input id="file-input" type="file" />
+            Choisir un fichier
+          </label>
+          <span id="file-name">Aucun fichier sélectionné</span>
+        </div>
+        <div class="row">
+          <button id="send-file" class="primary" disabled>
+            Démarrer l&apos;envoi
+          </button>
+        </div>
+        <div class="row">
+          <label>Lien à partager</label>
+          <input id="share-link" type="text" readonly />
+          <button id="copy-link">Copier le lien</button>
+        </div>
+        <progress id="send-progress" value="0" max="100"></progress>
+      </section>
+
+      <section class="card hidden" id="receiver-panel">
+        <h2>Recevoir un fichier</h2>
+        <div class="status" id="receiver-status">En attente de l&apos;envoyeur…</div>
+        <div class="row">
+          <button id="accept-file" class="primary" disabled>
+            Prêt à recevoir
+          </button>
+        </div>
+        <progress id="receive-progress" value="0" max="100"></progress>
+        <div id="download-area" class="hidden">
+          <p>Fichier prêt :</p>
+          <a id="download-link" class="primary" download>Télécharger</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Notes</h2>
+        <ul>
+          <li>Le fichier ne transite pas par un serveur.</li>
+          <li>
+            Un serveur de signalisation (WebSocket) sert uniquement à connecter les
+            deux navigateurs.
+          </li>
+          <li>
+            Utilisez un réseau stable ou configurez un serveur TURN pour les
+            réseaux stricts.
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

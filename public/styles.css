@@ -1,0 +1,158 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: #f6f6fb;
+  color: #1d1d2a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 920px;
+  margin: 40px auto;
+  padding: 0 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+header h1 {
+  margin-bottom: 8px;
+  font-size: 2.4rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: #5a5a70;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(25, 25, 45, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inline-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  color: #2a2a3a;
+}
+
+input[type="text"] {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d8d8e6;
+  min-width: 260px;
+}
+
+button,
+.primary {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: #5b6cff;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:not(.primary) {
+  background: #e6e8ff;
+  color: #2a2a3a;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.file-picker {
+  background: #eff0ff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.file-picker input {
+  display: none;
+}
+
+.helper {
+  margin: 0;
+  color: #6a6a80;
+}
+
+.status {
+  font-weight: 600;
+  color: #9a4b4b;
+}
+
+.status.success {
+  color: #297a3b;
+}
+
+progress {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+progress::-webkit-progress-bar {
+  background: #ececf7;
+}
+
+progress::-webkit-progress-value {
+  background: #5b6cff;
+}
+
+.hidden {
+  display: none;
+}
+
+#download-link {
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .inline-inputs {
+    align-items: stretch;
+  }
+
+  input[type="text"] {
+    min-width: 100%;
+  }
+}
