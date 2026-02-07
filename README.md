@@ -6,7 +6,7 @@ Transfert de fichiers 100% P2P entre deux navigateurs. Le fichier reste dans le 
 
 - WebRTC pour le transfert direct (peer-to-peer).
 - WebSocket uniquement pour la signalisation (échange d'offres/candidates).
-- Le lien généré permet au receveur de rejoindre automatiquement la session.
+- Le lien généré contient un jeton secret et permet au receveur de rejoindre automatiquement la session.
 - Le transfert fonctionne tant que l'onglet de l'envoyeur reste ouvert.
 
 ## Démarrer
@@ -25,4 +25,4 @@ Ouvrez ensuite [http://localhost:3000](http://localhost:3000) pour l'envoyeur. L
 
 ## Sécurité
 
-Le flux de données passe directement entre les deux navigateurs. Le serveur n'a jamais accès au contenu du fichier.
+Le flux de données passe directement entre les deux navigateurs. Le serveur n'a jamais accès au contenu du fichier. Le serveur de signalisation exige le jeton secret contenu dans le lien pour autoriser l'accès à une salle.

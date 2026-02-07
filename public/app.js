@@ -15,9 +15,12 @@ const downloadLink = document.getElementById("download-link");
 
 const urlParams = new URLSearchParams(window.location.search);
 const presetRoomId = urlParams.get("room");
+const presetToken = urlParams.get("token");
+const presetRole = urlParams.get("role");
 
 let role = null;
 let roomId = presetRoomId || "";
+let accessToken = presetToken || "";
 let ws;
 let peerConnection;
 let dataChannel;
@@ -43,11 +46,12 @@ function showPanel(panel) {
 }
 
 function updateShareLink() {
-  if (!roomId) return;
+  if (!roomId || !accessToken) return;
   const baseUrl = publicUrlInput?.value?.trim() || window.location.href;
   const url = new URL(baseUrl);
   url.pathname = window.location.pathname;
   url.searchParams.set("room", roomId);
+  url.searchParams.set("token", accessToken);
   url.searchParams.set("role", "receiver");
   shareLink.value = url.toString();
 }
@@ -69,14 +73,37 @@ function createRoomId() {
   return crypto.randomUUID();
 }
 
+function createAccessToken() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const base64 = btoa(String.fromCharCode(...bytes));
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function buildWebSocketUrl() {
+  const url = new URL(window.location.href);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  url.pathname = "/ws";
+  url.search = "";
+  return url.toString();
+}
+
 function connectWebSocket() {
   return new Promise((resolve) => {
-    ws = new WebSocket(`${window.location.origin.replace("http", "ws")}/ws`);
+    ws = new WebSocket(buildWebSocketUrl());
 
     ws.addEventListener("open", () => resolve());
 
     ws.addEventListener("message", async (event) => {
       const message = JSON.parse(event.data);
+
+      if (message.type === "error") {
+        setStatus(
+          role === "sender" ? senderStatus : receiverStatus,
+          message.message || "Erreur côté serveur."
+        );
+        return;
+      }
 
       if (message.type === "joined") {
         setStatus(
@@ -239,6 +266,13 @@ async function createOffer() {
 async function joinRoom(selectedRole) {
   role = selectedRole;
   roomId = roomId || createRoomId();
+  if (role === "sender") {
+    accessToken = accessToken || createAccessToken();
+  } else if (!accessToken) {
+    showPanel(receiverPanel);
+    setStatus(receiverStatus, "Lien invalide : jeton de sécurité manquant.");
+    return;
+  }
 
   if (role === "sender") {
     showPanel(senderPanel);
@@ -250,7 +284,7 @@ async function joinRoom(selectedRole) {
   await connectWebSocket();
   await initPeerConnection();
 
-  ws.send(JSON.stringify({ type: "join", roomId, role }));
+  ws.send(JSON.stringify({ type: "join", roomId, role, token: accessToken }));
 }
 
 fileInput.addEventListener("change", (event) => {
@@ -318,7 +352,13 @@ copyLinkButton.addEventListener("click", async () => {
   }, 2000);
 });
 
-if (presetRoomId) {
+publicUrlInput?.addEventListener("input", () => {
+  if (role === "sender") {
+    updateShareLink();
+  }
+});
+
+if (presetRoomId && presetRole === "receiver") {
   joinRoom("receiver");
 } else {
   joinRoom("sender");
