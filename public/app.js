@@ -7,7 +7,6 @@ const fileName = document.getElementById("file-name");
 const sendButton = document.getElementById("send-file");
 const shareLink = document.getElementById("share-link");
 const copyLinkButton = document.getElementById("copy-link");
-const resetLinkButton = document.getElementById("reset-link");
 const sendProgress = document.getElementById("send-progress");
 const receiveProgress = document.getElementById("receive-progress");
 const downloadArea = document.getElementById("download-area");
@@ -48,8 +47,8 @@ function showPanel(panel) {
 
 function updateShareLink() {
   if (!roomId || !accessToken) return;
-  const baseUrl = window.location.origin;
-  const url = new URL(baseUrl);
+  const url = new URL(window.location.origin);
+  url.protocol = "https:";
   url.pathname = window.location.pathname;
   url.searchParams.set("room", roomId);
   url.searchParams.set("token", accessToken);
@@ -371,13 +370,6 @@ copyLinkButton.addEventListener("click", async () => {
   setTimeout(() => {
     copyLinkButton.textContent = "Copier le lien";
   }, 2000);
-});
-
-resetLinkButton?.addEventListener("click", () => {
-  if (role !== "sender") return;
-  accessToken = createAccessToken();
-  updateShareLink();
-  setStatus(senderStatus, "Lien réinitialisé. Partagez le nouveau lien.");
 });
 
 if (presetRoomId && presetRole === "receiver") {
