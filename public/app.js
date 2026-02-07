@@ -11,6 +11,7 @@ const resetLinkButton = document.getElementById("reset-link");
 const sendProgress = document.getElementById("send-progress");
 const receiveProgress = document.getElementById("receive-progress");
 const downloadArea = document.getElementById("download-area");
+const downloadName = document.getElementById("download-name");
 const downloadLink = document.getElementById("download-link");
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -47,7 +48,7 @@ function showPanel(panel) {
 
 function updateShareLink() {
   if (!roomId || !accessToken) return;
-  const baseUrl = window.location.href;
+  const baseUrl = window.location.origin;
   const url = new URL(baseUrl);
   url.pathname = window.location.pathname;
   url.searchParams.set("room", roomId);
@@ -226,6 +227,9 @@ function setupDataChannel() {
         incomingSize = 0;
         updateReceiveProgress(0);
         downloadArea.classList.add("hidden");
+        if (downloadName) {
+          downloadName.textContent = `Nom du fichier : ${meta.name}`;
+        }
       }
       return;
     }
