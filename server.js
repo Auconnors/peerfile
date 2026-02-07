@@ -1,10 +1,13 @@
 import express from "express";
+import dotenv from "dotenv";
 import fs from "fs";
 import http from "http";
 import https from "https";
 import path from "path";
 import { fileURLToPath } from "url";
 import { WebSocketServer } from "ws";
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
