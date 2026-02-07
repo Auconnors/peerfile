@@ -1,5 +1,7 @@
 import express from "express";
+import fs from "fs";
 import http from "http";
+import https from "https";
 import path from "path";
 import { fileURLToPath } from "url";
 import { WebSocketServer } from "ws";
@@ -8,7 +10,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const server = http.createServer(app);
+const sslKeyPath = process.env.SSL_KEY_PATH;
+const sslCertPath = process.env.SSL_CERT_PATH;
+const hasSslConfig = Boolean(sslKeyPath && sslCertPath);
+const server = hasSslConfig
+  ? https.createServer(
+      {
+        key: fs.readFileSync(sslKeyPath),
+        cert: fs.readFileSync(sslCertPath)
+      },
+      app
+    )
+  : http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 const rooms = new Map();
@@ -179,5 +192,6 @@ app.get("/health", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`PeerFile server running on http://localhost:${PORT}`);
+  const protocol = hasSslConfig ? "https" : "http";
+  console.log(`PeerFile server running on ${protocol}://localhost:${PORT}`);
 });

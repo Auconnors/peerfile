@@ -18,6 +18,14 @@ npm start
 
 Ouvrez ensuite [http://localhost:3000](http://localhost:3000) pour l'envoyeur. Le receveur ouvre le lien partagé pour rejoindre.
 
+### HTTPS / certificats
+
+Pour activer HTTPS, fournissez un certificat et une clé via les variables d'environnement suivantes :
+
+```bash
+SSL_CERT_PATH=/chemin/vers/cert.pem SSL_KEY_PATH=/chemin/vers/key.pem npm start
+```
+
 ## Notes réseau
 
 - Un serveur STUN public est utilisé par défaut.
